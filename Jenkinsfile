@@ -1,10 +1,15 @@
 pipeline {
     agent any
 
+    environment {
+        GIT_CREDENTIALS = credentials('github-credentials') // Use the credentials ID created in Jenkins
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-username/html-site.git'
+                // Use the credentials to authenticate with GitHub
+                git url: 'https://github.com/shankar-240698/htmlpage.git', credentialsId: 'github-credentials'
             }
         }
 

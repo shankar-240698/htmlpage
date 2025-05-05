@@ -1,16 +1,28 @@
 pipeline {
     agent any
+
+    environment {
+        REMOTE_HOST = "your-ubuntu-instance-ip"  // Replace with your Ubuntu instance IP
+        REMOTE_USER = "your-username"            // Replace with your SSH username
+        SSH_KEY = credentials('jenkins-ssh-key') // Use Jenkins SSH key credential ID
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'htmlpage', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git', credentialsId: 'htmlpage'
-                }
+                git 'https://github.com/shankar-240698/htmlpage.git'  // Replace with your GitHub repo
             }
         }
+
         stage('Deploy to Apache') {
             steps {
-                sh 'cp -r * /var/www/html/'  // Make sure the appropriate directory is targeted for your deployment
+                script {
+                    sshagent([SSH_KEY]) {
+                        sh """
+                        scp -r * ${REMOTE_USER}@${REMOTE_HOST}:/var/www/html/
+                        """
+                    }
+                }
             }
         }
     }

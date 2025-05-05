@@ -1,27 +1,23 @@
 pipeline {
     agent any
 
-    environment {
-        REMOTE_HOST = "18.212.11.83"  // Replace with your Ubuntu instance IP
-        REMOTE_USER = "ubuntu"            // Replace with your SSH username
-        // SSH_KEY = credentials('htmlpage-key') // Use Jenkins SSH key credential ID
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git' // Replace with your GitHub repo
+                git 'https://github.com/shankar-240698/htmlpage.git'
             }
         }
 
         stage('Deploy to Apache') {
             steps {
-                script {
-                    sshagent(['ssh-key-jenkins']) {
-                        sh """
-                        scp -r * ${REMOTE_USER}@${REMOTE_HOST}:/var/www/html/
-                        """
-                    }
+                sshagent(['ssh-key-jenkins']) {
+                    sh '''
+                        # Ensure remote host is in known_hosts to avoid verification prompt
+                        ssh-keyscan -H 18.212.11.83 >> ~/.ssh/known_hosts
+
+                        # Copy files to the remote Apache server
+                        scp -o StrictHostKeyChecking=no -r Jenkinsfile about.html css index.html ubuntu@18.212.11.83:/var/www/html/
+                    '''
                 }
             }
         }

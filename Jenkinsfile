@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_HOST = "your-ubuntu-instance-ip"  // Replace with your Ubuntu instance IP
-        REMOTE_USER = "your-username"            // Replace with your SSH username
-        SSH_KEY = credentials('jenkins-ssh-key') // Use Jenkins SSH key credential ID
+        REMOTE_HOST = "18.212.11.83"  // Replace with your Ubuntu instance IP
+        REMOTE_USER = "ubuntu"            // Replace with your SSH username
+        SSH_KEY = credentials('htmlpage-key') // Use Jenkins SSH key credential ID
     }
 
     stages {

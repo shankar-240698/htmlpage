@@ -17,7 +17,7 @@ pipeline {
             }
 
             steps {
-                sshagent(credentials: ['ubuntu']) {
+                sshagent(credentials: ['ssh-key-jenkins']) {
                     sh '''
                         # Ensure .ssh directory exists and host is known
                         mkdir -p ~/.ssh

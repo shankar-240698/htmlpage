@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main' 'https://github.com/shankar-240698/htmlpage.git'  // Replace with your GitHub repo
+                git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git' // Replace with your GitHub repo
             }
         }
 

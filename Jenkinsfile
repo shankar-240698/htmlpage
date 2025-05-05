@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Use the credentials to authenticate with GitHub
-                git url: 'https://github.com/shankar-240698/htmlpage.git', credentialsId: 'github-credentials'
+                git url: 'https://github.com/shankar-240698/htmlpage.git', credentialsId: 'htmlpage'
             }
         }
 

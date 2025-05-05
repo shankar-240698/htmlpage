@@ -17,7 +17,7 @@ pipeline {
         stage('Deploy to Apache') {
             steps {
                 script {
-                    sshagent([SSH_KEY]) {
+                    sshagent([htmlpage-key]) {
                         sh """
                         scp -r * ${REMOTE_USER}@${REMOTE_HOST}:/var/www/html/
                         """

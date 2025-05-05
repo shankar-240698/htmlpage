@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_CREDENTIALS = credentials('github-credentials') // Use the credentials ID created in Jenkins
+        GIT_CREDENTIALS = credentials('htmlpage') // Use the credentials ID created in Jenkins
     }
 
     stages {

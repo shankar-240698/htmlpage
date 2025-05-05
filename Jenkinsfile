@@ -4,7 +4,7 @@ pipeline {
     environment {
         REMOTE_HOST = "18.212.11.83"  // Replace with your Ubuntu instance IP
         REMOTE_USER = "ubuntu"            // Replace with your SSH username
-        SSH_KEY = credentials('htmlpage-key') // Use Jenkins SSH key credential ID
+        // SSH_KEY = credentials('htmlpage-key') // Use Jenkins SSH key credential ID
     }
 
     stages {
@@ -17,7 +17,7 @@ pipeline {
         stage('Deploy to Apache') {
             steps {
                 script {
-                    sshagent([SSH_KEY]) {
+                    sshagent(['ssh-key-jenkins']) {
                         sh """
                         scp -r * ${REMOTE_USER}@${REMOTE_HOST}:/var/www/html/
                         """

@@ -1,32 +1,17 @@
 pipeline {
     agent any
-
-    environment {
-        GIT_CREDENTIALS = credentials('htmlpage') // Use the credentials ID created in Jenkins
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                // Use the credentials to authenticate with GitHub
-                git url: 'https://github.com/shankar-240698/htmlpage.git', credentialsId: 'htmlpage'
+                withCredentials([usernamePassword(credentialsId: 'htmlpage', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git', credentialsId: 'htmlpage'
+                }
             }
         }
-
         stage('Deploy to Apache') {
             steps {
-                echo 'Copying files to Apache directory...'
-                sh '''
-                    sudo rm -rf /var/www/html/*
-                    sudo cp -r * /var/www/html/
-                '''
+                sh 'cp -r * /var/www/html/'  // Make sure the appropriate directory is targeted for your deployment
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'HTML site deployed successfully!'
         }
     }
 }

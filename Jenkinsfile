@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-               git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git'
+                git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git'
             }
         }
 
@@ -29,8 +29,8 @@ pipeline {
                         # Copy files to remote temp directory
                         scp -o StrictHostKeyChecking=no -r Jenkinsfile about.html css index.html $REMOTE_USER@$REMOTE_HOST:$REMOTE_TEMP/
 
-                        # Move files from temp to Apache web root using sudo
-                        ssh $REMOTE_USER@$REMOTE_HOST "sudo mv $REMOTE_TEMP/* $REMOTE_HTML/"
+                        # Use rsync to update Apache web root
+                        ssh $REMOTE_USER@$REMOTE_HOST "sudo rsync -a --delete $REMOTE_TEMP/ $REMOTE_HTML/"
                     '''
                 }
             }

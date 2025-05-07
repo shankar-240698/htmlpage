@@ -14,9 +14,6 @@ git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git'
 }
 }
 
-python
-Copy
-Edit
 stage('Build & Archive Artifacts') {
   steps {
     sh '''

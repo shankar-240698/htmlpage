@@ -1,1 +1,24 @@
+name: Deploy Docker container
+hosts: any
+become: true
+tasks:
 
+name: Ensure Docker is installed
+apt:
+name: docker.io
+state: present
+update_cache: yes
+
+name: Pull Docker image
+docker_image:
+name: "{{ docker_image }}"
+source: pull
+
+name: Run container
+docker_container:
+name: html-app
+image: "{{ docker_image }}"
+state: started
+restart_policy: always
+ports:
+- "80:80"

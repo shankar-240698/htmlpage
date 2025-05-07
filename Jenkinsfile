@@ -1,39 +1,71 @@
 pipeline {
-    agent any
+agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git'
-            }
-        }
+environment {
+AWS_DEFAULT_REGION = 'us-east-1'
+S3_BUCKET = 's3htmlpage'
+IMAGE_NAME = 'msshankar/htmlpage'
+}
 
-        stage('Deploy to Apache') {
-            environment {
-                REMOTE_HOST = '18.212.11.83'
-                REMOTE_USER = 'ubuntu'
-                REMOTE_TEMP = '/home/ubuntu/deploy'
-                REMOTE_HTML = '/var/www/html'
-            }
+stages {
+stage('Checkout') {
+steps {
+git branch: 'main', url: 'https://github.com/shankar-240698/htmlpage.git'
+}
+}
 
-            steps {
-                sshagent(credentials: ['ssh-key-jenkins']) {
-                    sh '''
-                        # Ensure .ssh directory exists and host is known
-                        mkdir -p ~/.ssh
-                        ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
+python
+Copy
+Edit
+stage('Build & Archive Artifacts') {
+  steps {
+    sh '''
+      mkdir -p build
+      cp index.html about.html -r css build/
+      zip -r build.zip build
+    '''
+    archiveArtifacts artifacts: 'build.zip', fingerprint: true
+  }
+}
 
-                        # Create remote temp directory
-                        ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p $REMOTE_TEMP"
-
-                        # Copy files to remote temp directory
-                        scp -o StrictHostKeyChecking=no -r Jenkinsfile about.html css index.html $REMOTE_USER@$REMOTE_HOST:$REMOTE_TEMP/
-
-                        # Use rsync to update Apache web root
-                        ssh $REMOTE_USER@$REMOTE_HOST "sudo rsync -a --delete $REMOTE_TEMP/ $REMOTE_HTML/"
-                    '''
-                }
-            }
-        }
+stage('Upload to S3') {
+  steps {
+    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+      sh '''
+        aws s3 cp build.zip s3://$S3_BUCKET/jenkins-artifacts/${GIT_COMMIT}.zip
+      '''
     }
+  }
+}
+
+stage('Build & Push Docker Image') {
+  steps {
+    script {
+      def tag = GIT_COMMIT.take(7)
+      def fullTag = "${IMAGE_NAME}:${tag}"
+      env.IMAGE_TAG = fullTag
+
+      sh "docker build -t ${fullTag} ."
+      withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        sh '''
+          echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+          docker push ${IMAGE_TAG}
+        '''
+      }
+    }
+  }
+}
+
+stage('Deploy with Ansible') {
+  steps {
+    sshagent(credentials: ['ssh-key']) {
+      sh '''
+        ansible-playbook -i ansible/inventory.yml ansible/deploy.yml \
+          -e "docker_image=${IMAGE_TAG}" \
+          --private-key ~/.ssh/id_rsa
+      '''
+    }
+  }
+}
+}
 }

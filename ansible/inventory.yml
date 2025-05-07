@@ -1,6 +1,6 @@
 all:
     children:
-    test:
+    webservers:
       hosts:
         webservers:
           ansible_host: 18.212.11.83
